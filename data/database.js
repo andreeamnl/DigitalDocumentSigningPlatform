@@ -40,8 +40,20 @@ const userSchema = new mongoose.Schema({
 //   console.error(error);
 // });
 
+
+const documentSchema = new mongoose.Schema({
+  filename: String,
+  path: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
+  },
+ 
+});
+
 module.exports = {
     database: new Database(),
     userSchema: userSchema,
+    documentSchema: documentSchema,
     mongoose: mongoose,
 }
