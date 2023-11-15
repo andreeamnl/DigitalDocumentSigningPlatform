@@ -14,11 +14,13 @@ const verifyHashedData = async (unhashed, hashed) => {
         const match = await bcrypt.compare(unhashed, hashed);
         return match;
     } catch (error) {
+        console.log(`Input data: ${unhashed}, ${hashed}`)
+        console.log("Error in verifyHashedData", error)
         throw error;
     }
 }
 
 module.exports = {
     hashData,
-    verifyHashedData
+    verifyHashedData,
 };
