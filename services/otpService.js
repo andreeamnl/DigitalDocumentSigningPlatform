@@ -56,7 +56,7 @@ const sendOTP = async ({ email, subject, message, duration = 1 }) => {
             <p>This code <b>expires in ${duration} hour(s)</b>.</p>
             `,
         };
-        // await sendEmail(mailOptions);
+        await sendEmail(mailOptions);
 
         // save OTP record
         const hashedOTP = await hashData(generatedOTP);
