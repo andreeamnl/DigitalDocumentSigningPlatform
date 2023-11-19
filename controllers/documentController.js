@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-
-const { documentSchema } = require("../models/documentModel");
+const database = require('../database/db');
+const { Document } = require("../models/documentModel");
 const { userSchema } = require("../models/userModel");
 const { upload } = require("../util/storage")
 
@@ -10,8 +10,6 @@ router.get('/upload', (req, res) => {
 });
 
 router.post('/upload', upload.single('document'), async (req, res) => {
-	const Document = database.mongoose.model('Document', documentSchema);
-
 	// Check if no file was uploaded in the request
 	if (!req.file) {
 		return res.status(400).send('No file was uploaded.');
@@ -41,39 +39,36 @@ router.post('/upload', upload.single('document'), async (req, res) => {
 });
 
 router.get('/download/:documentId', async (req, res) => {
-	const Document = database.mongoose.model('Document', documentSchema);
-
+	
 	try {
-	  // try to find the document in the database by its ID
+	  // Try to find the document in the database by its ID
 	  const document = await Document.findById(req.params.documentId);
-
+  
 	  // Check if the document was not found
 	  if (!document) {
 		return res.status(404).send('Document not found');
 	  }
-
+  
 	  // Set the appropriate response headers for downloading the file
 	  res.setHeader('Content-disposition', 'attachment; filename=' + document.filename);
-	  // You may need to set the appropriate content type based on the file type
-	  res.setHeader('Content-type', 'application/pdf'); 
-
-		// Send the file as a response
-		res.download(document.path, document.filename, (error) => {
-			if (error) {
-				console.error(error);
-				res.status(500).send('Failed to download the document');
-			} else {
-				console.log('Document downloaded successfully');
-			}
-		});
+  
+	  // Send the file as a response
+	  res.download(document.path, document.filename, (error) => {
+		if (error) {
+		  console.error(error);
+		  res.status(500).send('Failed to download the document');
+		} else {
+		  console.log('Document downloaded successfully');
+		}
+	  });
 	} catch (error) {
-		console.error(error);
-		res.status(500).send('Failed to download the document');
+	  console.error(error);
+	  res.status(500).send('Failed to download the document');
 	}
-});
+  });
+  
 
 router.get("/docs", async (request, response) => {
-	const Document = database.mongoose.model('Document',database.documentSchema);
 	const docs = await Document.find({});
 	try {
 		response.send(docs);
@@ -81,5 +76,4 @@ router.get("/docs", async (request, response) => {
 		response.status(500).send(error);
 	}
 })
-
 module.exports = router;
