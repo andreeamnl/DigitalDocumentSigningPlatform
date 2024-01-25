@@ -1,13 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const { createNewUser, authenicateUser } = require("../services/userService");
+const { User } = require("../models/userModel");
 const auth = require("../middleware/auth");
 
 // protected route
-router.get("/private_data", auth, (req, res) => {
+router.get("/private_data", auth, async(req, res) => {
+
+	const userEmail = req.currentUser.email;
+
+	const fetchedUser = await User.findOne({ email: userEmail });
+
 	res
 		.status(200)
-		.send(`You're in the private territory of ${req.currentUser.email}`);
+		.send({
+			email: fetchedUser.email,
+			name: fetchedUser.name
+		});
 });
 
 // Signin

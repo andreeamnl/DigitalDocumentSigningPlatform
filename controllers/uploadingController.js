@@ -20,7 +20,7 @@ router.post('/signature', auth, upload.single('file'), async (req, res) => {
          return res.status(400).send('Allowed only JPG/JPEG signatures');
      }
  
-    const userId = auth.currentUser.userId;
+    const userId = req.currentUser.userId;
      
     // create folder with user id if doesn't exist
     const userFolderPath = path.join(__dirname, '..', 'uploads', userId.toString());
@@ -49,7 +49,7 @@ router.post('/signature', auth, upload.single('file'), async (req, res) => {
  });
 
 router.get('/certificate', auth, async (req, res) => {
-    const userId = auth.currentUser.userId;
+    const userId = req.currentUser.userId;
 
     try {
         // Try to find the document in the database by its ID
@@ -78,7 +78,7 @@ router.post('/certificate', auth, upload.single('file'), async (req, res) => {
         return res.status(400).send('Allowed only PFX certificates');
     }
 
-    const userId = auth.currentUser.userId;
+    const userId = req.currentUser.userId;
 
     // create folder with user id if doesn't exist
     const userFolderPath = path.join(__dirname, '..', 'uploads', userId.toString());
