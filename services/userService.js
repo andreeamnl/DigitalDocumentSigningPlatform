@@ -19,6 +19,7 @@ const createNewUser = async (data) => {
             name,
             email,
             password: hashedPassword,
+            isEmailVerified: false
         });
 
         // save user
@@ -37,6 +38,10 @@ const authenicateUser = async(data) => {
 
         if (!fetchedUser) {
             throw Error("Invalid email entered");
+        }
+
+        if (!fetchedUser.isEmailVerified) {
+            throw Error("Email is not verified")
         }
 
         const hashedPassword = fetchedUser.password;

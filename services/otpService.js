@@ -1,6 +1,7 @@
 const OTP = require("../models/otpModel");
 const sendEmail = require("./emailService");
 const { hashData, verifyHashedData } = require("../util/hashData");
+const { User } = require("../models/userModel");
 const { AUTH_EMAIL } = process.env;
 
 const verifyOTP = async ({ email, otp }) => {
@@ -26,6 +27,9 @@ const verifyOTP = async ({ email, otp }) => {
 
         // not expired yet, verify value
         const validOTP = await verifyHashedData(otp, matchedOTPRecord.otp);
+
+        const fetchedUser = await User.findOneAndUpdate({ email }, {isEmailVerified: true});
+
         return validOTP;
     } catch (error) {
         console.log("Error in verifyOTP ", error);
