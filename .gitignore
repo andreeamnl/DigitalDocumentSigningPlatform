@@ -87,6 +87,9 @@ web_modules/
 .next
 out
 
+# Large ass .wasm file
+asposepdf/AsposePDFforNode.wasm
+
 # Nuxt.js build / generate output
 .nuxt
 dist
