@@ -12,25 +12,27 @@ const { upload } = require("../util/storage");
 router.post('/signature', auth, upload.single('file'), async (req, res) => {
     // if no file was uploaded 
      if (!req.file) {
-         return res.status(400).send('No file was uploaded.');
+        console.log('No file was uploaded.');
+        return res.status(400).send('No file was uploaded.');
      }
  
       // check the format of the file (JPEG )
-     if (req.file.mimetype !== 'image/jpeg' || req.file.mimetype !== 'image/jpg') {
-         return res.status(400).send('Allowed only JPG/JPEG signatures');
+     if (req.file.mimetype !== 'image/jpeg' && req.file.mimetype !== 'image/jpg') {
+        console.log('Allowed only JPG/JPEG signatures');
+        return res.status(400).send('Allowed only JPG/JPEG signatures');
      }
  
-    const userId = req.currentUser.userId;
-     
-    // create folder with user id if doesn't exist
-    const userFolderPath = path.join(__dirname, '..', 'uploads', userId.toString());
-    if (!fs.existsSync(userFolderPath)){
-        fs.mkdirSync(userFolderPath);
-    }
+     const userId = req.currentUser.userId;
 
-    //move uploaded signature to user folder
-    const filePath = path.join(userFolderPath, req.file.originalname);
-    fs.renameSync(req.file.path, filePath);
+     // create folder with user id if doesn't exist
+     const userFolderPath = path.join(__dirname, '..', 'uploads', userId.toString());
+     if (!fs.existsSync(userFolderPath)){
+         fs.mkdirSync(userFolderPath);
+     }
+ 
+     //move uploaded certificate to user folder
+     const filePath = path.join(userFolderPath, req.file.originalname);
+     fs.renameSync(req.file.path, filePath);
 
     // Create a new signature using the Signature model
     const signature = new Signature({
@@ -53,7 +55,7 @@ router.get('/certificate', auth, async (req, res) => {
 
     try {
         // Try to find the document in the database by its ID
-        const certificate = await Certificate.findById(req.params.documentId);
+        const certificate = await Certificate.findOne(req.params.documentId);
     
         // Check if the document was not found
         if (!certificate) {
