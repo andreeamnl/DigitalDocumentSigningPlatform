@@ -8,27 +8,88 @@ const { Certificate } = require("../models/certificateModel");
 const { Signature } = require("../models/signatureModel");
 const { upload } = require("../util/storage");
 
+router.get('/signature', auth, async (req, res) => {
+    const userId = req.currentUser.userId;
+
+    try {
+        // Try to find the document in the database by its ID
+        const signature = await Signature.findOne({ user: userId} );
+    
+        // Check if the document was not found
+        if (!signature) {
+            return res.status(404).send('Signature not found');
+        }
+    
+        return res.status(200).send('Signature is present.');
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to download the signature');
+      }
+});
+
+router.get('/signature_file', auth, async (req, res) => {
+    
+
+    try {
+        const userId = req.currentUser.userId;
+        // Try to find the document in the database by its ID
+        const signature = await Signature.findOne({ user: userId } );
+
+        // Check if the document was not found
+        if (!signature) {
+            return res.status(404).send('Signature not found');
+        }
+    
+        // Set the appropriate response headers for downloading the file
+        res.setHeader('Content-disposition', 'attachment; filename=' + signature.filename);
+    
+        // Send the file as a response
+        res.download(signature.path, signature.filename, (error) => {
+            if (error) {
+            console.error(error);
+            res.status(500).send('Failed to download the document');
+            } else {
+            console.log('Document downloaded successfully');
+            }
+        });
+        } catch (error) {
+        console.error(error);
+        res.status(500).send('Failed to download the document');
+    }
+});
 
 router.post('/signature', auth, upload.single('file'), async (req, res) => {
     // if no file was uploaded 
-     if (!req.file) {
-         return res.status(400).send('No file was uploaded.');
-     }
- 
-      // check the format of the file (JPEG )
-     if (req.file.mimetype !== 'image/jpeg' || req.file.mimetype !== 'image/jpg') {
-         return res.status(400).send('Allowed only JPG/JPEG signatures');
-     }
- 
+    if (!req.file) {
+        console.log('No file was uploaded.');
+        return res.status(400).send('No file was uploaded.');
+    }
+
+    // check the format of the file (JPEG )
+    if (req.file.mimetype !== 'image/jpeg' && req.file.mimetype !== 'image/jpg') {
+        console.log('Allowed only JPG/JPEG signatures');
+        return res.status(400).send('Allowed only JPG/JPEG signatures');
+    }
+
     const userId = req.currentUser.userId;
-     
+
     // create folder with user id if doesn't exist
     const userFolderPath = path.join(__dirname, '..', 'uploads', userId.toString());
     if (!fs.existsSync(userFolderPath)){
         fs.mkdirSync(userFolderPath);
     }
 
-    //move uploaded signature to user folder
+    // Check if a signature is already present, then delete it >:)
+    // Try to find the document in the database by its ID
+    const signatureOld = await Signature.findOne({ user: userId } );
+
+    // Check if the signature was found
+    if (signatureOld) {
+        fs.rmSync(path.join(signatureOld.path))
+        await Signature.deleteOne({ user: userId } );
+    }
+
+    //move uploaded certificate to user folder
     const filePath = path.join(userFolderPath, req.file.originalname);
     fs.renameSync(req.file.path, filePath);
 
@@ -52,23 +113,23 @@ router.post('/signature', auth, upload.single('file'), async (req, res) => {
     const userId = req.currentUser.userId;
 
     try {
-        //find any certificate in the database for the current user
-        const certificates = await Certificate.find({ user: userId });
+        // Try to find the document in the database by its ID
+        const certificate = await Certificate.findOne({ user: userId} );
     
-        // Check if no certificates were found
-        if (certificates.length === 0) {
-            return res.status(404).send('No certificates found ');
+        // Check if the document was not found
+        if (!certificate) {
+            return res.status(404).send('Certificate not found');
         }
     
-        return res.status(200).send('Certificate is available');
-    } catch (error) {
+        return res.status(200).send('Certificate is present.');
+      } catch (error) {
         console.error(error);
-        res.status(500).send('Failed to retrieve certificates');
-    }
+        res.status(500).send('Failed to download the certificate');
+      }
 });
 
 router.post('/certificate', auth, upload.single('file'), async (req, res) => {
-   // if no file was uploaded 
+    // if no file was uploaded 
     if (!req.file) {
         return res.status(400).send('No file was uploaded.');
     }
@@ -84,6 +145,16 @@ router.post('/certificate', auth, upload.single('file'), async (req, res) => {
     const userFolderPath = path.join(__dirname, '..', 'uploads', userId.toString());
     if (!fs.existsSync(userFolderPath)){
         fs.mkdirSync(userFolderPath);
+    }
+
+    // Check if a certificate is already present, then delete it >:)
+    // Try to find the certificate in the database by its ID
+    const certificateOld = await Certificate.findOne({ user: userId } );
+
+    // Check if the certificate was found
+    if (certificateOld) {
+        fs.rmSync(path.join(certificateOld.path))
+        await Certificate.deleteOne({ user: userId } );
     }
 
     //move uploaded certificate to user folder
