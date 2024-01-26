@@ -20,7 +20,10 @@ router.get('/signature', auth, async (req, res) => {
             return res.status(404).send('Signature not found');
         }
     
-        return res.status(200).send('Signature is present.');
+        return res.status(200).json({
+            'filename': signature.filename,
+            'message': 'Signature is present.'
+        });
       } catch (error) {
         console.error(error);
         res.status(500).send('Failed to download the signature');
@@ -85,7 +88,9 @@ router.post('/signature', auth, upload.single('file'), async (req, res) => {
 
     // Check if the signature was found
     if (signatureOld) {
-        fs.rmSync(path.join(signatureOld.path))
+        if (fs.existsSync(path.join(signatureOld.path))) {
+            fs.rmSync(path.join(signatureOld.path))
+        }
         await Signature.deleteOne({ user: userId } );
     }
 
@@ -121,7 +126,10 @@ router.get('/certificate', auth, async (req, res) => {
             return res.status(404).send('Certificate not found');
         }
     
-        return res.status(200).send('Certificate is present.');
+        return res.status(200).json({
+            'filename': certificate.filename,
+            'message': 'Certificate is present.'
+        });
       } catch (error) {
         console.error(error);
         res.status(500).send('Failed to download the certificate');

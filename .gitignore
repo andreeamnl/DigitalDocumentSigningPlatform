@@ -90,6 +90,9 @@ out
 # Large ass .wasm file
 asposepdf/AsposePDFforNode.wasm
 
+# Uploads
+uploads/*
+
 # Nuxt.js build / generate output
 .nuxt
 dist

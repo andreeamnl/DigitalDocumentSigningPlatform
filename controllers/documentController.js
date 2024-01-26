@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const database = require('../database/db');
+const path = require("path");
+const fs = require('fs');
 const auth = require("../middleware/auth");
 const { Document } = require("../models/documentModel");
 const { userSchema } = require("../models/userModel");
@@ -35,7 +37,7 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
 	const document = new Document({
 		filename: req.file.originalname,
 		path: req.file.path,
-		user: user._id,
+		user: userId,
 		status: "ready"
 	});
 
@@ -73,14 +75,14 @@ router.get('/download/:documentId', async (req, res) => {
 		}
 	  });
 	} catch (error) {
-	  console.error(error);
-	  res.status(500).send('Failed to download the document');
+		console.error(error);
+		res.status(500).send('Failed to download the document');
 	}
   });
   
 
 router.get("/docs", auth, async (request, response) => {
-	const userId = req.currentUser.userId;
+	const userId = request.currentUser.userId;
 
 	const docs = await Document.find({user: userId});
 	try {
