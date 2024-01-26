@@ -29,6 +29,18 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
         fs.mkdirSync(userFolderPath);
     }
 
+	// Check if a document is already present, then delete it >:)
+    // Try to find the document in the database by its ID
+    const documentOld = await Document.findOne({ user: userId } );
+
+    // Check if the document was found
+    if (documentOld) {
+        if (fs.existsSync(path.join(documentOld.path))) {
+            fs.rmSync(path.join(documentOld.path))
+        }
+        await Document.deleteOne({ user: userId } );
+    }
+
     //move uploaded certificate to user folder
     const filePath = path.join(userFolderPath, req.file.originalname);
     fs.renameSync(req.file.path, filePath);
@@ -36,7 +48,7 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
 	// Create a new document using the Document model
 	const document = new Document({
 		filename: req.file.originalname,
-		path: req.file.path,
+		path: filePath,
 		user: userId,
 		status: "ready"
 	});
@@ -51,7 +63,7 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
 	}
 });
 
-router.get('/download/:documentId', async (req, res) => {
+router.get('/download/:documentId', auth, async (req, res) => {
 	
 	try {
 	  // Try to find the document in the database by its ID
@@ -63,10 +75,10 @@ router.get('/download/:documentId', async (req, res) => {
 	  }
   
 	  // Set the appropriate response headers for downloading the file
-	  res.setHeader('Content-disposition', 'attachment; filename=' + document.filename);
+	  res.setHeader('Content-disposition', 'attachment; filename=' + document.filename.replace('.pdf', '_signed.pdf'));
   
 	  // Send the file as a response
-	  res.download(document.path, document.filename, (error) => {
+	  res.download(document.path.replace('.pdf', '_signed.pdf'), document.filename.replace('.pdf', '_signed.pdf'), (error) => {
 		if (error) {
 		  console.error(error);
 		  res.status(500).send('Failed to download the document');
