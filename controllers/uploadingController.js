@@ -109,7 +109,7 @@ router.post('/signature', auth, upload.single('file'), async (req, res) => {
     }
  });
 
- router.get('/certificate', auth, async (req, res) => {
+router.get('/certificate', auth, async (req, res) => {
     const userId = req.currentUser.userId;
 
     try {
@@ -177,13 +177,4 @@ router.post('/certificate', auth, upload.single('file'), async (req, res) => {
     }
 });
 
-//get the certificates
-router.get("/cert", async (request, response) => {
-	const cert = await Certificate.find({});
-	try {
-		response.send(cert);
-	} catch (error) {
-		response.status(500).send(error);
-	}
-})
 module.exports = router;
