@@ -31,7 +31,7 @@ router.post('/upload', auth, upload.single('document'), async (req, res) => {
 
 	// Check if a document is already present, then delete it >:)
     // Try to find the document in the database by its ID
-    const documentOld = await Document.findOne({ user: userId } );
+    const documentOld = await Document.findOne({ user: userId, filename: req.file.originalname} );
 
     // Check if the document was found
     if (documentOld) {

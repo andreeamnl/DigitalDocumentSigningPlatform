@@ -56,7 +56,7 @@ router.post('/digital_signature', auth, async (req, res) => {
         const result_file = `.//uploads/${userId}/${pdf_file_name.replace(".pdf", "_signed.pdf")}`;
         // Sign a PDF-file with digital signatures and save the "ResultSignPKCS7.pdf"
         AsposePdf().then(AsposePdfModule => {
-            const json = AsposePdfModule.AsposePdfSignPKCS7(pdf_file, 1, certificate_path, password, x_indent, y_indent, height, width, "Reason", "Contact", "Location", 1, img_file, result_file);
+            const json = AsposePdfModule.AsposePdfSignPKCS7(pdf_file, 1, certificate_path, password, x_indent, y_indent, height, width, "PBL", "Mihai Gaidau", "UTM", 1, img_file, result_file);
             console.log("AsposePdfSignPKCS7 => %O", json.errorCode == 0 ? json.fileNameResult : json.errorText);
             console.log("AsposePdfSignPKCS7 => %O", json.errorCode);
             
